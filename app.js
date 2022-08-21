@@ -5,7 +5,9 @@ function onClick(e) {
         li.remove();
     })
 }
-document.querySelector(".btn").addEventListener("click", addTask)
+
+const form = document.querySelector("form")
+form.addEventListener("submit", addTask)
 function addTask(e) {
     const input = document.getElementById('task').value
     const li = document.createElement("li")
@@ -18,4 +20,8 @@ function addTask(e) {
     link.innerHTML = '<i class="fa fa-remove"></i>'
     li.appendChild(link)
     document.querySelector("ul.collection").appendChild(li)
+}
+document.querySelector(".delete-item secondary-content").addEventListener("click",removeTask)
+function removeTask(e) {
+   console.log(e.target)
 }
