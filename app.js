@@ -1,15 +1,32 @@
-document.querySelector(".clear-tasks").addEventListener("click", onClick)
-const items = document.querySelectorAll("ul.collection li.collection-item")
+const items = document.querySelectorAll(".collection")
+const check = document.querySelector(".delete-item secondary-content")
+const clearTasks = document.querySelector(".clear-tasks")
+let arrayOfTasks = [];
+getLocalStorage()
+//remove all tasks
+clearTasks.addEventListener("click",onClick)
 function onClick(e) {
-    items.forEach(function(li){
-        li.remove();
-    })
+  e.preventDefault();
+  if (items.children.length > 0) {
+      const TodoArray = Array.from(items.children);
+      TodoArray.forEach((todo) => {
+          todo.remove();
+      });
+      localStorage.clear();
+  }
+   
 }
-
 const form = document.querySelector("form")
 form.addEventListener("submit", addTask)
+// add a task 
 function addTask(e) {
-    const input = document.getElementById('task').value
+  e.preventDefault()
+  console.log("hello")
+  createTask()
+  addDataToLocalStorageFrom(arrayOfTasks)
+}
+ function createTask() {
+    let input = document.getElementById('task').value
     const li = document.createElement("li")
     li.className = "collection-item"
     li.id = "new item"  
@@ -19,35 +36,37 @@ function addTask(e) {
     link.className = "delete-item secondary-content"
     link.innerHTML = '<i class="fa fa-remove"></i>'
     li.appendChild(link)
-    document.querySelector("ul.collection").appendChild(li)
+    console.log(document.querySelector(".collection"))
+    document.querySelector(".collection").appendChild(li)
+    arrayOfTasks.push(input);
+    input =""
 }
-document.querySelector(".delete-item secondary-content").addEventListener("click",removeTask)
-function removeTask(e) {
-   console.log(e.target)
+document.querySelector(".collection").addEventListener("click",deleteTask)
+// remove one specific task
+function deleteTask(e){
+    if (e.target.className === "fa fa-remove") {
+      removeFromStorage(e.target.outerText);
+        e.target.parentNode.parentNode.remove()
+      
+      }
 }
-
-
-
-document.querySelector("form").addEventListener("submit", function (e) {
-    e.preventDefault()
-    const task = document.getElementById("task").value
+const removeFromStorage = (todo) => {
+  let todos;
+  if (localStorage.getItem("tasks") !== null) {
+      todos = JSON.parse(localStorage.getItem("tasks"));
+      todos.splice(todos.indexOf(todo), 1);
+      localStorage.setItem("tasks", JSON.stringify(todos));
+  }
+};
+// local storage 
+function getLocalStorage(){
+  if (localStorage.getItem("tasks")) {
+    arrayOfTasks = JSON.parse(localStorage.getItem("tasks"));
+  }
+  arrayOfTasks.forEach(createTask)
+}
+function addDataToLocalStorageFrom(arrayOfTasks) {
+    localStorage.setItem("tasks", JSON.stringify(arrayOfTasks));
+  }
   
-    let tasks
   
-    if (localStorage.getItem("tasks") === null) {
-      tasks = []
-    } else {
-      tasks = JSON.parse(localStorage.getItem("tasks"))
-    }
-  
-    tasks.push(task)
-  
-    localStorage.setItem("tasks", JSON.stringify(tasks))
-    alert("Task Saved")
-  })
-  
-  const tasks = JSON.parse(localStorage.getItem("tasks"))
-  
-  tasks.forEach((task) => {
-    console.log(task)
-  })
