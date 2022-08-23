@@ -1,72 +1,118 @@
-const items = document.querySelectorAll(".collection")
-const check = document.querySelector(".delete-item secondary-content")
-const clearTasks = document.querySelector(".clear-tasks")
-let arrayOfTasks = [];
-getLocalStorage()
-//remove all tasks
-clearTasks.addEventListener("click",onClick)
-function onClick(e) {
-  e.preventDefault();
-  if (items.children.length > 0) {
-      const TodoArray = Array.from(items.children);
-      TodoArray.forEach((todo) => {
-          todo.remove();
-      });
-      localStorage.clear();
-  }
-   
-}
-const form = document.querySelector("form")
-form.addEventListener("submit", addTask)
-// add a task 
-function addTask(e) {
-  e.preventDefault()
-  console.log("hello")
-  createTask()
-  addDataToLocalStorageFrom(arrayOfTasks)
-}
- function createTask() {
-    let input = document.getElementById('task').value
+const form = document.querySelector("#task-form")
+const taskList = document.querySelector(".collection")
+const clearBtn = document.querySelector(".clear-tasks")
+const taskInput = document.querySelector("#task")
+
+  // DOM Load event
+  document.addEventListener("DOMContentLoaded", getTasks)
+  // Add task event
+  form.addEventListener("submit", addTask)
+  // Remove task event
+  taskList.addEventListener("click", removeTask)
+  // Clear task event
+  clearBtn.addEventListener("click", clearTasks)
+
+  function createTask(task) {
     const li = document.createElement("li")
     li.className = "collection-item"
     li.id = "new item"  
     li.setAttribute("title", "New Item")
-    li.appendChild(document.createTextNode(input))
+    li.appendChild(document.createTextNode(task))
     const link = document.createElement("a")
     link.className = "delete-item secondary-content"
     link.innerHTML = '<i class="fa fa-remove"></i>'
     li.appendChild(link)
-    console.log(document.querySelector(".collection"))
-    document.querySelector(".collection").appendChild(li)
-    arrayOfTasks.push(input);
-    input =""
+    items.appendChild(li)
 }
-document.querySelector(".collection").addEventListener("click",deleteTask)
-// remove one specific task
-function deleteTask(e){
-    if (e.target.className === "fa fa-remove") {
-      removeFromStorage(e.target.outerText);
-        e.target.parentNode.parentNode.remove()
-      
-      }
+// Get Tasks from LS
+function getTasks() {
+  let tasks
+  if (localStorage.getItem("tasks") === null) {
+    tasks = []
+  } else {
+    tasks = JSON.parse(localStorage.getItem("tasks"))
+  }
+
+  tasks.forEach(function (task) {
+    createTask(task)
+  })
 }
-const removeFromStorage = (todo) => {
-  let todos;
-  if (localStorage.getItem("tasks") !== null) {
-      todos = JSON.parse(localStorage.getItem("tasks"));
-      todos.splice(todos.indexOf(todo), 1);
-      localStorage.setItem("tasks", JSON.stringify(todos));
+
+// Add Task
+function addTask(e) {
+  if (taskInput.value === "") {
+    alert("Add a task")
+  } else {
+    createTask(taskInput.value)
+
+    // Store in LS
+    storeTaskInLocalStorage(taskInput.value)
+
+    // Clear input
+    taskInput.value = ""
   }
-};
-// local storage 
-function getLocalStorage(){
-  if (localStorage.getItem("tasks")) {
-    arrayOfTasks = JSON.parse(localStorage.getItem("tasks"));
-  }
-  arrayOfTasks.forEach(createTask)
+
+  e.preventDefault()
 }
-function addDataToLocalStorageFrom(arrayOfTasks) {
-    localStorage.setItem("tasks", JSON.stringify(arrayOfTasks));
+
+// Store Task
+function storeTaskInLocalStorage(task) {
+  let tasks
+  if (localStorage.getItem("tasks") === null) {
+    tasks = []
+  } else {
+    tasks = JSON.parse(localStorage.getItem("tasks"))
   }
-  
-  
+
+  tasks.push(task)
+
+  localStorage.setItem("tasks", JSON.stringify(tasks))
+}
+
+// Remove Task
+function removeTask(e) {
+  if (e.target.parentElement.classList.contains("delete-item")) {
+    if (confirm("Are You Sure?")) {
+      e.target.parentElement.parentElement.remove()
+
+      // Remove from LS
+      removeTaskFromLocalStorage(e.target.parentElement.parentElement)
+    }
+  }
+}
+
+// Remove from LS
+function removeTaskFromLocalStorage(taskItem) {
+  let tasks
+  if (localStorage.getItem("tasks") === null) {
+    tasks = []
+  } else {
+    tasks = JSON.parse(localStorage.getItem("tasks"))
+  }
+
+  tasks.forEach(function (task, index) {
+    if (taskItem.textContent === task) {
+      tasks.splice(index, 1)
+    }
+  })
+
+  localStorage.setItem("tasks", JSON.stringify(tasks))
+}
+
+// Clear Tasks
+function clearTasks() {
+  // taskList.innerHTML = '';
+
+  // Faster
+  while (taskList.firstChild) {
+    taskList.removeChild(taskList.firstChild)
+  }
+
+  // Clear from LS
+  clearTasksFromLocalStorage()
+}
+
+// Clear Tasks from LS
+function clearTasksFromLocalStorage() {
+  localStorage.clear()
+}
